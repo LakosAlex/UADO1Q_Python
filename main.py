@@ -27,19 +27,28 @@ lblSalary.grid(row=3, column=0)
 lblEmail = tkinter.Label(inputFrm, text="Email: ")
 lblEmail.grid(row=4, column=0)
 
-txtBxName = tkinter.Text(inputFrm, height=1, font=('Arial', 10), width=20)
-txtBxName.grid(row=0, column=1, pady=10, padx=10)
+txtBxName = tkinter.Text(inputFrm)
+txtBxName.grid(row=0, column=1)
 
-txtBxAge = tkinter.Text(inputFrm, height=1, font=('Arial', 10), width=20)
-txtBxAge.grid(row=1, column=1, pady=10)
+txtBxAge = tkinter.Text(inputFrm)
+txtBxAge.grid(row=1, column=1)
 
 cmbBxGender = ttk.Combobox(inputFrm, height=1, font=('Arial', 10), width=17, values=["Male", "Female"])
-cmbBxGender.grid(row=2, column=1, pady=10)
+cmbBxGender.grid(row=2, column=1)
 
-txtBxSalary = tkinter.Text(inputFrm, height=1, font=('Arial', 10), width=20)
-txtBxSalary.grid(row=3, column=1, pady=10)
+txtBxSalary = tkinter.Text(inputFrm)
+txtBxSalary.grid(row=3, column=1)
 
-txtBxEmail = tkinter.Text(inputFrm, height=1, font=('Arial', 10), width=20)
-txtBxEmail.grid(row=4, column=1, pady=10)
+txtBxEmail = tkinter.Text(inputFrm)
+txtBxEmail.grid(row=4, column=1)
+
+for widget in inputFrm.winfo_children():
+    if isinstance(widget, tkinter.Text):
+        widget['font'] = ('Arial', 10)
+        widget['height'] = 1
+        widget['width'] = 20
+    widget.grid_configure(padx=10, pady=10)
+
+
 
 mainFrm.mainloop()
