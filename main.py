@@ -1,4 +1,5 @@
 import tkinter
+from tkinter.filedialog import asksaveasfile
 from tkinter.ttk import Treeview
 import DB
 from faker import *
@@ -6,8 +7,8 @@ import User
 
 loginFrm = tkinter.Tk()
 loginFrm.title("Login App")
-loginFrm.configure(bg='lightblue')
-innerFrm = tkinter.Frame(loginFrm)
+loginFrm.configure(bg='black')
+innerFrm = tkinter.Frame(loginFrm, bg='#F5F1EA')
 innerFrm.pack()
 
 def createLoginGUI():
@@ -83,7 +84,7 @@ def createRegistrationGUI():
                                                 ])
     bttnRegister.grid(row=6, column=0)
 
-    bttnFakeData = tkinter.Button(registFrm, text="Generate fake personal data",
+    bttnFakeData = tkinter.Button(registFrm, text="Generate",
                                command=lambda: generateFakeData(entryEmailR, entryAddressR, entryJobR, entryUsernameR,
                                                                 entryPsswR, entryPhoneNumberR))
     bttnFakeData.grid(row=6, column=1)
@@ -131,14 +132,35 @@ def createDataOutputGUI():
     tv.column('Email', anchor='center', width=350)
     DB.getAllUsers()
     fillTreeView(tv)
+
+    bttnRefresh = tkinter.Button(dOutputFrm, text="Refresh", command=lambda: fillTreeView(tv))
+    bttnRefresh.grid(row=1, columnspan=1)
+
+    bttnSave = tkinter.Button(dOutputFrm, text="Save to file", command=lambda: saveTreeView(tv))
+    bttnSave.grid(row=2, columnspan=1)
+
+    for widget in dOutputFrm.winfo_children():
+        widget.grid_configure(padx=10, pady=10)
+
+
     loginFrm.mainloop()
 def fillTreeView(tv):
+    for row in tv.get_children():
+        tv.delete(row)
     users = DB.getAllUsers()
     for user in users:
         tv.insert('', 'end', values=(user.username, user.email))
     tv.grid(sticky=("N", "S", "W", "E"))
     tv.grid_rowconfigure(0, weight=1)
     tv.grid_columnconfigure(0, weight=1)
+def saveTreeView(tv):
+    name = asksaveasfile(mode='w', defaultextension='.txt')
+    list = []
+    for row in tv.get_children():
+        list.append(tv.item(row)['values'])
+    for user in list:
+        name.write("Username: " + user.__getitem__(0) + " | Email: " + user.__getitem__(1) + "\n")
+    name.close
 
 loginGUI = createLoginGUI()
 registrationGUI = createRegistrationGUI()

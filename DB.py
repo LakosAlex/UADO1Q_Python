@@ -6,14 +6,17 @@ from User import UserTreeViewDto
 
 users = []
 def connectToDB():
-    connection = pymysql.connect(host="sql7.freemysqlhosting.net",
-                                     port=3306,
-                                     user="sql7580972",
-                                     password="4sL98xD5s7",
-                                     db="sql7580972",
-                                     charset="utf8",
-                                     cursorclass=pymysql.cursors.DictCursor)
-    return connection
+    try:
+        connection = pymysql.connect(host="sql7.freemysqlhosting.net",
+                                         port=3306,
+                                         user="sql7580972",
+                                         password="4sL98xD5s7",
+                                         db="sql7580972",
+                                         charset="utf8",
+                                         cursorclass=pymysql.cursors.DictCursor)
+        return connection
+    except pymysql.Error as e:
+        messagebox.showinfo("Login failed!", e)
 def checkLogin(userLoginDto):
 
     if userLoginDto.username == "" or userLoginDto.password == "":
