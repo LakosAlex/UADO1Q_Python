@@ -5,10 +5,10 @@ import DB
 from faker import *
 import User
 
-loginFrm = tkinter.Tk()
-loginFrm.title("Login App")
-loginFrm.configure(bg='black')
-innerFrm = tkinter.Frame(loginFrm, bg='#F5F1EA')
+mainFrm = tkinter.Tk()
+mainFrm.title("Login App")
+mainFrm.configure(bg='black')
+innerFrm = tkinter.Frame(mainFrm, bg='#F5F1EA')
 innerFrm.pack()
 
 def createLoginGUI():
@@ -80,7 +80,7 @@ def createRegistrationGUI():
 
     bttnRegister = tkinter.Button(registFrm, text="Register",
                                command=lambda:  [DB.insertUserIntoDB(User.UserEntity(entryUsernameR.get(), entryPsswR.get(), entryEmailR.get(), entryAddressR.get(), entryJobR.get(), entryPhoneNumberR.get())),
-                                                emptyComponents(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entryPsswR,entryPhoneNumberR)
+                                                emptyComponents(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entryPsswR, entryPhoneNumberR)
                                                 ])
     bttnRegister.grid(row=6, column=0)
 
@@ -142,8 +142,7 @@ def createDataOutputGUI():
     for widget in dOutputFrm.winfo_children():
         widget.grid_configure(padx=10, pady=10)
 
-
-    loginFrm.mainloop()
+    mainFrm.mainloop()
 def fillTreeView(tv):
     for row in tv.get_children():
         tv.delete(row)
@@ -155,14 +154,14 @@ def fillTreeView(tv):
     tv.grid_columnconfigure(0, weight=1)
 def saveTreeView(tv):
     name = asksaveasfile(mode='w', defaultextension='.txt')
-    list = []
+    userList = []
     for row in tv.get_children():
-        list.append(tv.item(row)['values'])
-    for user in list:
+        userList.append(tv.item(row)['values'])
+    for user in userList:
         name.write("Username: " + user.__getitem__(0) + " | Email: " + user.__getitem__(1) + "\n")
-    name.close
+    name.close()
 
-loginGUI = createLoginGUI()
-registrationGUI = createRegistrationGUI()
+
+createLoginGUI()
+createRegistrationGUI()
 createDataOutputGUI()
-

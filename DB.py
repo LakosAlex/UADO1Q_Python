@@ -4,7 +4,6 @@ import pymysql
 import pymysql.cursors
 from User import UserTreeViewDto
 
-users = []
 def connectToDB():
     try:
         connection = pymysql.connect(host="sql7.freemysqlhosting.net",
@@ -16,7 +15,7 @@ def connectToDB():
                                          cursorclass=pymysql.cursors.DictCursor)
         return connection
     except pymysql.Error as e:
-        messagebox.showinfo("Login failed!", e)
+        messagebox.showinfo("Login failed!", str(e))
 def checkLogin(userLoginDto):
 
     if userLoginDto.username == "" or userLoginDto.password == "":
@@ -36,7 +35,7 @@ def checkLogin(userLoginDto):
                     else:
                         messagebox.showinfo("Login successful!", "Hey there, " + userLoginDto.username + "!")
         except pymysql.Error as e:
-            messagebox.showinfo("Login failed!", e)
+            messagebox.showinfo("Login failed!", str(e))
 def insertUserIntoDB(userEntity):
     connection = connectToDB()
     hash = getHashedPassword(userEntity.password)
@@ -51,7 +50,7 @@ def insertUserIntoDB(userEntity):
                 connection.commit()
                 messagebox.showinfo("Registration", "Registration successful!")
         except pymysql.Error as e:
-            messagebox.showinfo("Registration failed", e)
+            messagebox.showinfo("Registration failed", str(e))
     else:
         messagebox.showinfo("Registration failed", "Please fill in all the entries!")
 def getAllUsers():
@@ -71,7 +70,4 @@ def getAllUsers():
                         users.append(UserTreeViewDto(user["username"], user["email"]))
                     return users
     except pymysql.Error as e:
-        messagebox.showinfo("Loading users failed!", e)
-
-
-
+        messagebox.showinfo("Loading users failed!", str(e))
