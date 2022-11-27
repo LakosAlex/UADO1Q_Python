@@ -1,7 +1,7 @@
 import tkinter
+from tkinter.ttk import Treeview
 import DB
 from faker import *
-
 import User
 
 loginFrm = tkinter.Tk()
@@ -10,28 +10,27 @@ loginFrm.configure(bg='lightblue')
 innerFrm = tkinter.Frame(loginFrm)
 innerFrm.pack()
 
-
 def createLoginGUI():
 
-    inputFrm = tkinter.LabelFrame(innerFrm, text="Login")
-    inputFrm.grid(row=0, column=0)
+    loginFrm = tkinter.LabelFrame(innerFrm, text="Login")
+    loginFrm.grid(row=0, column=0)
 
-    lblUsername = tkinter.Label(inputFrm, text="Username: ")
+    lblUsername = tkinter.Label(loginFrm, text="Username: ")
     lblUsername.grid(row=0, column=0)
 
-    lblPassword = tkinter.Label(inputFrm, text="Password: ")
+    lblPassword = tkinter.Label(loginFrm, text="Password: ")
     lblPassword.grid(row=1, column=0)
 
-    entryUsername = tkinter.Entry(inputFrm)
+    entryUsername = tkinter.Entry(loginFrm)
     entryUsername.grid(row=0, column=1)
 
-    entryPssw = tkinter.Entry(inputFrm, show='*')
+    entryPssw = tkinter.Entry(loginFrm, show='*')
     entryPssw.grid(row=1, column=1)
 
-    bttnLogin = tkinter.Button(inputFrm, text="Login", command=lambda: DB.checkLogin(User.UserLoginDto(entryUsername.get(), entryPssw.get())))
+    bttnLogin = tkinter.Button(loginFrm, text="Login", command=lambda: DB.checkLogin(User.UserLoginDto(entryUsername.get(), entryPssw.get())))
     bttnLogin.grid(row=2, columnspan=2)
 
-    for widget in inputFrm.winfo_children():
+    for widget in loginFrm.winfo_children():
         if isinstance(widget, tkinter.Text):
             widget['font'] = ('Arial', 10)
             widget['height'] = 1
@@ -54,8 +53,11 @@ def createRegistrationGUI():
     lblAddressR = tkinter.Label(registFrm, text="Address: ")
     lblAddressR.grid(row=3, column=0)
 
-    lblJobR = tkinter.Label(registFrm, text="Address: ")
+    lblJobR = tkinter.Label(registFrm, text="Job: ")
     lblJobR.grid(row=4, column=0)
+
+    lblPhoneNumberR = tkinter.Label(registFrm, text="Phone Number: ")
+    lblPhoneNumberR.grid(row=5, column=0)
 
     entryUsernameR = tkinter.Entry(registFrm)
     entryUsernameR.grid(row=0, column=1)
@@ -76,10 +78,8 @@ def createRegistrationGUI():
     entryPhoneNumberR.grid(row=5, column=1)
 
     bttnRegister = tkinter.Button(registFrm, text="Register",
-                               command=lambda: [DB.registerUser(entryUsernameR.get(), entryPsswR.get()),
-                                                DB.insertUserIntoDB(User.UserEntity(entryUsernameR.get(), entryPsswR.get(),
-                                                entryEmailR.get(), entryAddressR.get(), entryJobR.get(), entryPhoneNumberR.get())),
-                                                emptyComponents(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entryPsswR,entryPhoneNumberR),
+                               command=lambda:  [DB.insertUserIntoDB(User.UserEntity(entryUsernameR.get(), entryPsswR.get(), entryEmailR.get(), entryAddressR.get(), entryJobR.get(), entryPhoneNumberR.get())),
+                                                emptyComponents(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entryPsswR,entryPhoneNumberR)
                                                 ])
     bttnRegister.grid(row=6, column=0)
 
@@ -94,7 +94,6 @@ def createRegistrationGUI():
             widget['height'] = 1
             widget['width'] = 20
         widget.grid_configure(padx=10, pady=10)
-    loginFrm.mainloop()
 def generateFakeData(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entryPsswR, entryPhoneNumberR):
     fake = Faker("hu_HU")
     entryEmailR.delete(0, "end")
@@ -111,13 +110,37 @@ def generateFakeData(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entr
     entryPhoneNumberR.delete(0, "end")
     entryPhoneNumberR.insert(0, fake.phone_number())
 def emptyComponents(entryEmailR, entryAddressR, entryJobR, entryUsernameR, entryPsswR, entryPhoneNumberR):
-    entryEmailR.delete(0, "end")
-    entryAddressR.delete(0, "end")
-    entryJobR.delete(0, "end")
-    entryUsernameR.delete(0, "end")
-    entryPsswR.delete(0, "end")
-    entryPhoneNumberR.delete(0, "end")
+    if entryEmailR.get() != "" and entryAddressR.get() != "" and entryJobR.get() != "" and entryUsernameR.get() != "" and entryPsswR.get() != "" and entryPhoneNumberR.get() != "":
+        entryEmailR.delete(0, "end")
+        entryAddressR.delete(0, "end")
+        entryJobR.delete(0, "end")
+        entryUsernameR.delete(0, "end")
+        entryPsswR.delete(0, "end")
+        entryPhoneNumberR.delete(0, "end")
+def createDataOutputGUI():
+    dOutputFrm = tkinter.LabelFrame(innerFrm, text="Registered Users")
+    dOutputFrm.grid(row=1, columnspan=2)
 
-DB.readDBFile()
+    tv = Treeview(dOutputFrm)
+    tv['columns'] = ('Username', 'Email')
+    tv.heading('#0', text='')
+    tv.column('#0', width=0)
+    tv.heading('Username', text='Username')
+    tv.column('Username', anchor='center', width=200)
+    tv.heading('Email', text='Email')
+    tv.column('Email', anchor='center', width=350)
+    DB.getAllUsers()
+    fillTreeView(tv)
+    loginFrm.mainloop()
+def fillTreeView(tv):
+    users = DB.getAllUsers()
+    for user in users:
+        tv.insert('', 'end', values=(user.username, user.email))
+    tv.grid(sticky=("N", "S", "W", "E"))
+    tv.grid_rowconfigure(0, weight=1)
+    tv.grid_columnconfigure(0, weight=1)
+
 loginGUI = createLoginGUI()
 registrationGUI = createRegistrationGUI()
+createDataOutputGUI()
+

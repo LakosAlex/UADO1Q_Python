@@ -1,10 +1,10 @@
 from tkinter import messagebox
 from HASH import *
-from User import *
 import pymysql
 import pymysql.cursors
-users = []
+from User import UserTreeViewDto
 
+users = []
 def connectToDB():
     connection = pymysql.connect(host="sql7.freemysqlhosting.net",
                                      port=3306,
@@ -14,16 +14,6 @@ def connectToDB():
                                      charset="utf8",
                                      cursorclass=pymysql.cursors.DictCursor)
     return connection
-def readDBFile():
-    users.clear()
-    try:
-        with open('db.txt') as f:
-            for line in f:
-                list = (line.strip()).split(",", 1)
-                users.append(User(list[0], list[1]))
-            f.close()
-    except IOError:
-        messagebox.showinfo("Error", "The application could not read the database file!")
 def checkLogin(userLoginDto):
 
     if userLoginDto.username == "" or userLoginDto.password == "":
@@ -34,8 +24,8 @@ def checkLogin(userLoginDto):
         try:
             with connection:
                 with connection.cursor() as cursor:
-                    query = "SELECT `username`, `password` FROM `user` WHERE `username`=%s"
-                    cursor.execute(query, (userLoginDto.username))
+                    query = "SELECT `username`, `password` FROM `user` WHERE `username`=%s AND `password`=%s"
+                    cursor.execute(query, (userLoginDto.username, hash))
                     result = cursor.fetchone()
                     print(result)
                     if result is None:
@@ -43,43 +33,42 @@ def checkLogin(userLoginDto):
                     else:
                         messagebox.showinfo("Login successful!", "Hey there, " + userLoginDto.username + "!")
         except pymysql.Error as e:
-            messagebox.showinfo("Fail", e)
-def registerUser(username, password):
-    checkNumber = 0
-    if username == "" or password == "" or str(username).__contains__(",") or str(password).__contains__(","):
-        messagebox.showinfo("Registration failed!", "Username or Password not accepted!")
-    else:
-        user = User(username, password)
-        for obj in users:
-            if obj.username == user.username:
-                messagebox.showinfo("Registration failed!", "The username " + user.username + " is already in use!")
-                checkNumber = 1
-        if checkNumber == 0:
-            users.append(user)
-            messagebox.showinfo("Registration successful!", "The user was registered!")
-            refreshDB()
-def refreshDB():
-    try:
-        file = open("db.txt", "w")
-        for user in users:
-            file.write(user.username + "," + user.password + "\n")
-        file.close()
-    except IOError:
-        messagebox.showinfo("Error", "The application could not read the database file!")
-    readDBFile()
+            messagebox.showinfo("Login failed!", e)
 def insertUserIntoDB(userEntity):
     connection = connectToDB()
     hash = getHashedPassword(userEntity.password)
+    if userEntity.username and userEntity.password and userEntity.email and userEntity.address and userEntity.job and userEntity.phoneNumber:
+        try:
+            with connection:
+                with connection.cursor() as cursor:
+                    query = "INSERT INTO `user` (`username`, `password`, `email`, `address`, `job`, `phone_number` ) " \
+                            "VALUES (%s, %s, %s, %s, %s, %s)"
+                    cursor.execute(query, (userEntity.username, hash, userEntity.email,
+                                           userEntity.address, userEntity.job, userEntity.phoneNumber))
+                connection.commit()
+                messagebox.showinfo("Registration", "Registration successful!")
+        except pymysql.Error as e:
+            messagebox.showinfo("Registration failed", e)
+    else:
+        messagebox.showinfo("Registration failed", "Please fill in all the entries!")
+def getAllUsers():
+    users = []
+    connection = connectToDB()
     try:
         with connection:
             with connection.cursor() as cursor:
-                query = "INSERT INTO `user` (`username`, `password`, `email`, `address`, `job`, `phone_number` ) " \
-                      "VALUES (%s, %s, %s, %s, %s, %s)"
-                cursor.execute(query, (userEntity.username, hash, userEntity.email,
-                                     userEntity.address, userEntity.job, userEntity.phoneNumber))
-            connection.commit()
+                query = "SELECT `username`, `email` FROM `user`"
+                cursor.execute(query)
+                result = cursor.fetchall()
+                if result is None:
+                    messagebox.showinfo("Loading users", "Loading users was unsuccessful!")
+                else:
+                    for user in result:
+                        print(user)
+                        users.append(UserTreeViewDto(user["username"], user["email"]))
+                    return users
     except pymysql.Error as e:
-        messagebox.showinfo("Fail", e)
+        messagebox.showinfo("Loading users failed!", e)
 
 
 
